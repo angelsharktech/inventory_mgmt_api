@@ -4,7 +4,7 @@ const PaymentModeSchema = new mongoose.Schema({
   paymentType: {
     type: String,
     required: true,
-    enum: ['Cash', 'Cheque', 'Online Transfer', 'Card', 'UPI', 'Other'],
+    enum: ['cash', 'cheque', 'online transfer', 'card', 'upi', 'other'],
     default: 'Cash'
   },
   amount: {
@@ -12,9 +12,13 @@ const PaymentModeSchema = new mongoose.Schema({
     required: true,
     min: [1, 'Amount cannot be negative']
   },
-    work_id: { 
+    salebill: { 
       type: mongoose.Schema.Types.ObjectId, 
-      ref: 'Work',
+      ref: 'SaleBill',
+    },
+    purchasebill: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'PurchaseBill',
     },
       client_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -89,7 +93,11 @@ const PaymentModeSchema = new mongoose.Schema({
     unique: true,
     sparse: true
   },
-
+  //bill type sale or purchase 
+ billType:{
+    type: String,
+    trim:true
+ },
   // Status
   status: {
     type: String,

@@ -56,6 +56,7 @@ exports.createUser = async (req, res) => {
       bio,
       status,
       hidefee,
+      gstRegistered,
     } = req.body;
 
     const user = new User({
@@ -75,6 +76,7 @@ exports.createUser = async (req, res) => {
       bio,
       status,
       hidefee,
+      gstRegistered,
     });
 
     await user.save();

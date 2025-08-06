@@ -12,13 +12,13 @@ router.patch('/change-password', userController.changePassword);
 
 
 // Get all users (protected route)
-router.get('/', authenticateToken, userController.getAllUsers);
+router.get('/',  userController.getAllUsers);
 
 // Get a single user by ID (protected route)
-router.get('/:id', authenticateToken, userController.getUserById);
+router.get('/:id',  userController.getUserById);
 
 // Update a user by ID (protected route)
-router.put('/:id', authenticateToken, userController.updateUser);
+router.put('/:id',  userController.updateUser);
 // Update a user by ID (protected route)
 
 router.patch('/:id', authenticateToken, userController.patchUser);

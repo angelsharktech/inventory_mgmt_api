@@ -85,12 +85,13 @@ exports.getCategory = async (req, res) => {
 // @route   PUT /api/categories/:id
 exports.updateCategory = async (req, res) => {
   try {
-    const { name, description, parent, image, displayOrder, isActive } = req.body;
+    const { name, slug, description, parent, image, displayOrder, isActive } = req.body;
 
     const category = await Category.findByIdAndUpdate(
       req.params.id,
       { 
         name,
+        slug,
         description,
         parent,
         image,

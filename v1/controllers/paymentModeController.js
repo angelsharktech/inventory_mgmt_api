@@ -11,10 +11,39 @@ exports.getPaymentModes = async (req, res) => {
       query.organization = req.user.organization;
     }
 
+    // Add filtering by paymentType if provided
+    if (req.query.paymentType) {
+      query.paymentType = req.query.paymentType.toLowerCase();
+    }
+
+    // Add filtering by status if provided
+    if (req.query.status) {
+      query.status = req.query.status;
+    }
+
+    // Add filtering by client_id if provided
+    if (req.query.client_id) {
+      query.client_id = req.query.client_id;
+    }
+
+    // Add filtering by associate_id if provided
+    if (req.query.associate_id) {
+      query.associate_id = req.query.associate_id;
+    }
+
+    // Add date range filtering if provided
+    if (req.query.startDate && req.query.endDate) {
+      query.date = {
+        $gte: new Date(req.query.startDate),
+        $lte: new Date(req.query.endDate)
+      };
+    }
+
     const paymentModes = await PaymentMode.find(query)
-      .populate('work_id', 'name description')
       .populate('client_id', 'name email')
       .populate('associate_id', 'name email')
+      .populate('salebill', 'invoiceNumber')
+      .populate('purchasebill', 'invoiceNumber')
       .populate('organization', 'name')
       .populate('created_by', 'name email')
       .sort({ date: -1 });
@@ -38,9 +67,10 @@ exports.getPaymentModes = async (req, res) => {
 exports.getPaymentMode = async (req, res) => {
   try {
     const paymentMode = await PaymentMode.findById(req.params.id)
-      .populate('work_id', 'name description')
       .populate('client_id', 'name email')
       .populate('associate_id', 'name email')
+      .populate('salebill', 'invoiceNumber')
+      .populate('purchasebill', 'invoiceNumber')
       .populate('organization', 'name')
       .populate('created_by', 'name email');
 
@@ -88,6 +118,16 @@ exports.createPaymentMode = async (req, res) => {
       req.body.created_by = req.user.id;
     }
 
+    // Set default paymentType to 'cash' if not provided
+    if (!req.body.paymentType) {
+      req.body.paymentType = 'cash';
+    }
+
+    // Convert paymentType to lowercase to match enum values
+    if (req.body.paymentType) {
+      req.body.paymentType = req.body.paymentType.toLowerCase();
+    }
+
     // Validate payment type specific fields
     const errors = validatePaymentFields(req.body);
     if (errors.length > 0) {
@@ -102,9 +142,10 @@ exports.createPaymentMode = async (req, res) => {
     
     // Populate references after creation
     const populatedPaymentMode = await PaymentMode.findById(paymentMode._id)
-      .populate('work_id', 'name description')
       .populate('client_id', 'name email')
       .populate('associate_id', 'name email')
+      .populate('salebill', 'invoiceNumber')
+      .populate('purchasebill', 'invoiceNumber')
       .populate('organization', 'name')
       .populate('created_by', 'name email');
 
@@ -150,6 +191,11 @@ exports.updatePaymentMode = async (req, res) => {
       });
     }
 
+    // Convert paymentType to lowercase if provided
+    if (req.body.paymentType) {
+      req.body.paymentType = req.body.paymentType.toLowerCase();
+    }
+
     // Validate payment type specific fields
     const errors = validatePaymentFields(req.body);
     if (errors.length > 0) {
@@ -168,9 +214,10 @@ exports.updatePaymentMode = async (req, res) => {
         runValidators: true
       }
     )
-    .populate('work_id', 'name description')
     .populate('client_id', 'name email')
     .populate('associate_id', 'name email')
+    .populate('salebill', 'invoiceNumber')
+    .populate('purchasebill', 'invoiceNumber')
     .populate('organization', 'name')
     .populate('created_by', 'name email');
 
@@ -218,6 +265,7 @@ exports.patchPaymentMode = async (req, res) => {
 
     // For PATCH requests, we need to validate only if paymentType is being updated
     if (req.body.paymentType) {
+      req.body.paymentType = req.body.paymentType.toLowerCase();
       const paymentData = { ...existingPayment.toObject(), ...req.body };
       
       const errors = validatePaymentFields(paymentData);
@@ -238,9 +286,10 @@ exports.patchPaymentMode = async (req, res) => {
         runValidators: true
       }
     )
-    .populate('work_id', 'name description')
     .populate('client_id', 'name email')
     .populate('associate_id', 'name email')
+    .populate('salebill', 'invoiceNumber')
+    .populate('purchasebill', 'invoiceNumber')
     .populate('organization', 'name')
     .populate('created_by', 'name email');
 
@@ -286,7 +335,7 @@ exports.deletePaymentMode = async (req, res) => {
       });
     }
 
-    const paymentMode = await PaymentMode.findByIdAndDelete(req.params.id);
+    await PaymentMode.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,
@@ -301,21 +350,54 @@ exports.deletePaymentMode = async (req, res) => {
   }
 };
 
-// @desc    Get payment modes by work ID
-// @route   GET /api/v1/payment-modes/work/:workId
-exports.getPaymentsByWork = async (req, res) => {
+// @desc    Get payment modes by salebill ID
+// @route   GET /api/v1/payment-modes/salebill/:salebillId
+exports.getPaymentsBySaleBill = async (req, res) => {
   try {
     // Build query with organization check if user is organization admin
-    let query = { work_id: req.params.workId };
+    let query = { salebill: req.params.salebillId };
     if (req.user && req.user.organization) {
       query.organization = req.user.organization;
     }
 
     const payments = await PaymentMode.find(query)
-      .populate('client_id', 'name email')
+      .populate('client_id', 'first_name last_name email')
       .populate('associate_id', 'name email')
       .populate('organization', 'name')
       .populate('created_by', 'name email')
+      .populate('salebill')
+      .sort({ date: -1 });
+    
+    res.status(200).json({
+      success: true,
+      count: payments.length,
+      data: payments
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get payment modes by purchasebill ID
+// @route   GET /api/v1/payment-modes/purchasebill/:purchasebillId
+exports.getPaymentsByPurchaseBill = async (req, res) => {
+  try {
+    // Build query with organization check if user is organization admin
+    let query = { purchasebill: req.params.purchasebillId };
+    if (req.user && req.user.organization) {
+      query.organization = req.user.organization;
+    }
+
+    const payments = await PaymentMode.find(query)
+      .populate('client_id', 'first_name last_name email')
+      .populate('associate_id', 'name email')
+      .populate('organization', 'name')
+      .populate('created_by', 'name email')
+      .populate('purchasebill')
       .sort({ date: -1 });
 
     res.status(200).json({
@@ -343,8 +425,9 @@ exports.getPaymentsByClient = async (req, res) => {
     }
 
     const payments = await PaymentMode.find(query)
-      .populate('work_id', 'name description')
       .populate('associate_id', 'name email')
+      .populate('salebill', 'invoiceNumber')
+      .populate('purchasebill', 'invoiceNumber')
       .populate('organization', 'name')
       .populate('created_by', 'name email')
       .sort({ date: -1 });
@@ -377,9 +460,10 @@ exports.getPaymentsByOrganization = async (req, res) => {
     }
 
     const payments = await PaymentMode.find({ organization: req.params.orgId })
-      .populate('work_id', 'name description')
-      .populate('client_id', 'name email')
+      .populate('client_id', 'first_name last_name email')
       .populate('associate_id', 'name email')
+      .populate('salebill')
+      .populate('purchasebill')
       .populate('created_by', 'name email')
       .sort({ date: -1 });
 
@@ -408,8 +492,9 @@ exports.getPaymentsByAssociate = async (req, res) => {
     }
 
     const payments = await PaymentMode.find(query)
-      .populate('work_id', 'name description')
       .populate('client_id', 'name email')
+      .populate('salebill', 'invoiceNumber')
+      .populate('purchasebill', 'invoiceNumber')
       .populate('organization', 'name')
       .populate('created_by', 'name email')
       .sort({ date: -1 });
@@ -439,9 +524,10 @@ exports.getPaymentsByCreatedBy = async (req, res) => {
     }
 
     const payments = await PaymentMode.find(query)
-      .populate('work_id', 'name description')
       .populate('client_id', 'name email')
       .populate('associate_id', 'name email')
+      .populate('salebill', 'invoiceNumber')
+      .populate('purchasebill', 'invoiceNumber')
       .populate('organization', 'name')
       .sort({ date: -1 });
 
@@ -476,12 +562,12 @@ function validatePaymentFields(body) {
   }
 
   // Payment type specific validations
-  if (paymentType === 'Online Transfer') {
+  if (paymentType === 'online transfer') {
     if (!body.utrId) errors.push('UTR ID is required for online transfers');
     if (!body.bankName) errors.push('Bank name is required for online transfers');
   }
 
-  if (paymentType === 'Cheque') {
+  if (paymentType === 'cheque') {
     if (!body.chequeNumber) errors.push('Cheque number is required');
     if (!body.chequeDate) errors.push('Cheque date is required');
     if (!body.bankName) errors.push('Bank name is required for cheques');
@@ -492,7 +578,7 @@ function validatePaymentFields(body) {
     }
   }
 
-  if (paymentType === 'Card') {
+  if (paymentType === 'card') {
     if (!body.cardLastFour) errors.push('Card last 4 digits are required');
     if (!body.cardType) errors.push('Card type (Debit/Credit) is required');
     
@@ -501,7 +587,7 @@ function validatePaymentFields(body) {
     }
   }
 
-  if (paymentType === 'UPI') {
+  if (paymentType === 'upi') {
     if (!body.upiId) errors.push('UPI ID is required');
     if (body.upiId && !/\S+@\S+/.test(body.upiId)) {
       errors.push('Invalid UPI ID format');

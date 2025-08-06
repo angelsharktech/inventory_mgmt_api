@@ -23,6 +23,9 @@ const documentRoutes = require('./routes/documentRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const productRoutes = require('./routes/productRoutes');
+const salebillRoutes = require('./routes/salebillRoutes');
+const purchasebillRoutes = require('./routes/purchasebillRoutes');
+const gstRoutes = require('./routes/gstRoutes');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -83,6 +86,9 @@ app.use('/api/documents', documentRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/salebills', salebillRoutes);
+app.use('/api/purchasebills', purchasebillRoutes);
+app.use('/api/gst', gstRoutes);
 
 app.get('/', (req, res) => {3
   res.sendFile(__dirname + '/views/index.html');

@@ -5,7 +5,7 @@ const UserSchema = new mongoose.Schema({
   first_name: { type: String, required: true },
   last_name: { type: String },
   phone_number: { type: String, unique: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
   country: { type: String },
   address: { type: String },
   city: { type: String },
@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
   position_id: { required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Position' },
   profile_picture: { type: String },
   bio: { type: String },
-  status: { required: true, type: String, enum: ['active', 'non_active', 'suspended'], default: 'active' },
+  status: { required: true, type: String, enum: ['active', 'inactive', 'suspended'], default: 'active' },
   
   // Banking Information
   bankDetails: {
@@ -28,6 +28,7 @@ const UserSchema = new mongoose.Schema({
     paymentQR: { type: String } // This could store a URL or path to the QR code image
   },
   
+    gstRegistered: { type: Boolean, default: false },
   // ======================
   // Client-Specific Fields (embedded)
   // ======================
