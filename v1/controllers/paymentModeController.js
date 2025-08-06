@@ -365,15 +365,53 @@ exports.getPaymentsBySaleBill = async (req, res) => {
       .populate('associate_id', 'name email')
       .populate('organization', 'name')
       .populate('created_by', 'name email')
-      .populate('salebill')
+      .populate({
+        path: 'salebill',
+        transform: (doc) => {
+          if (!doc) return doc;
+          
+          // Clean up products array
+          if (doc.products && Array.isArray(doc.products)) {
+            doc.products = doc.products.map(product => {
+              // Handle Buffer data if present
+              if (product.buffer && product.buffer.type === 'Buffer') {
+                try {
+                  // Convert Buffer to string and parse as JSON
+                  const bufferString = Buffer.from(product.buffer.data).toString();
+                  const parsedProduct = JSON.parse(bufferString);
+                  return {
+                    ...parsedProduct,
+                    _id: product._id || parsedProduct._id || new mongoose.Types.ObjectId()
+                  };
+                } catch (error) {
+                  console.error('Error parsing product buffer:', error);
+                  // Fallback to default product structure if parsing fails
+                }
+              }
+              
+              // Ensure minimum required product structure
+              return {
+                _id: product._id || new mongoose.Types.ObjectId(),
+                name: product.name || 'Unknown Product',
+                price: product.price || 0,
+                qty: product.qty || 1,
+                discount: product.discount || 0,
+                ...product // Preserve other existing fields
+              };
+            });
+          }
+          return doc;
+        }
+      })
       .sort({ date: -1 });
-    
+
     res.status(200).json({
       success: true,
       count: payments.length,
       data: payments
     });
   } catch (error) {
+    console.error('Error in getPaymentsBySaleBill:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error',
@@ -397,7 +435,44 @@ exports.getPaymentsByPurchaseBill = async (req, res) => {
       .populate('associate_id', 'name email')
       .populate('organization', 'name')
       .populate('created_by', 'name email')
-      .populate('purchasebill')
+      .populate({
+        path: 'purchasebill',
+        transform: (doc) => {
+          if (!doc) return doc;
+          
+          // Clean up products array
+          if (doc.products && Array.isArray(doc.products)) {
+            doc.products = doc.products.map(product => {
+              // Handle Buffer data if present
+              if (product.buffer && product.buffer.type === 'Buffer') {
+                try {
+                  // Convert Buffer to string and parse as JSON
+                  const bufferString = Buffer.from(product.buffer.data).toString();
+                  const parsedProduct = JSON.parse(bufferString);
+                  return {
+                    ...parsedProduct,
+                    _id: product._id || parsedProduct._id || new mongoose.Types.ObjectId()
+                  };
+                } catch (error) {
+                  console.error('Error parsing product buffer:', error);
+                  // Fallback to default product structure if parsing fails
+                }
+              }
+              
+              // Ensure minimum required product structure
+              return {
+                _id: product._id || new mongoose.Types.ObjectId(),
+                name: product.name || 'Unknown Product',
+                price: product.price || 0,
+                qty: product.qty || 1,
+                discount: product.discount || 0,
+                ...product // Preserve other existing fields
+              };
+            });
+          }
+          return doc;
+        }
+      })
       .sort({ date: -1 });
 
     res.status(200).json({
@@ -406,6 +481,7 @@ exports.getPaymentsByPurchaseBill = async (req, res) => {
       data: payments
     });
   } catch (error) {
+    console.error('Error in getPaymentsByPurchaseBill:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error',
@@ -450,7 +526,7 @@ exports.getPaymentsByClient = async (req, res) => {
 // @route   GET /api/v1/payment-modes/organization/:orgId
 exports.getPaymentsByOrganization = async (req, res) => {
   try {
-    // Check if user has access to this organization
+    // Authorization check
     if (req.user && req.user.organization && 
         req.user.organization.toString() !== req.params.orgId) {
       return res.status(403).json({
@@ -459,12 +535,66 @@ exports.getPaymentsByOrganization = async (req, res) => {
       });
     }
 
+    // Function to clean up products array
+    const cleanProducts = (products) => {
+      if (!products || !Array.isArray(products)) return products;
+      
+      return products.map(product => {
+        // Handle Buffer data if present
+        if (product.buffer && product.buffer.type === 'Buffer') {
+          try {
+            // Convert Buffer to proper object if it contains serialized data
+            const productData = JSON.parse(Buffer.from(product.buffer.data).toString());
+            return {
+              ...productData,
+              _id: product._id || productData._id || new mongoose.Types.ObjectId()
+            };
+          } catch (e) {
+            console.error('Buffer conversion error:', e);
+          }
+        }
+        
+        // Return minimal product structure if fields are missing
+        return {
+          _id: product._id || new mongoose.Types.ObjectId(),
+          name: product.name || 'Unknown Product',
+          price: product.price || 0,
+          qty: product.qty || 1,
+          discount: product.discount || 0,
+          ...product // preserve other fields
+        };
+      });
+    };
+
     const payments = await PaymentMode.find({ organization: req.params.orgId })
-      .populate('client_id', 'first_name last_name email')
-      .populate('associate_id', 'name email')
-      .populate('salebill')
-      .populate('purchasebill')
-      .populate('created_by', 'name email')
+      .populate({
+        path: 'client_id',
+        select: 'first_name last_name email'
+      })
+      .populate({
+        path: 'associate_id',
+        select: 'name email'
+      })
+      .populate({
+        path: 'salebill',
+        transform: doc => {
+          if (!doc) return doc;
+          doc.products = cleanProducts(doc.products);
+          return doc;
+        }
+      })
+      .populate({
+        path: 'purchasebill',
+        transform: doc => {
+          if (!doc) return doc;
+          doc.products = cleanProducts(doc.products);
+          return doc;
+        }
+      })
+      .populate({
+        path: 'created_by',
+        select: 'name email'
+      })
       .sort({ date: -1 });
 
     res.status(200).json({
@@ -473,6 +603,7 @@ exports.getPaymentsByOrganization = async (req, res) => {
       data: payments
     });
   } catch (error) {
+    console.error('Error fetching payments:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error',
