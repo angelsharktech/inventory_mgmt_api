@@ -52,7 +52,8 @@ exports.createSaleBill = async (req, res) => {
         hsnCode: productDetails.hsnCode || product.hsnCode,
         qty: product.qty,
         discount: product.discount || 0,
-        price: product.price || productDetails.price
+        price: product.price || productDetails.price,
+        unitPrice : product.compareAtPrice || productDetails.compareAtPrice
       };
     }));
 

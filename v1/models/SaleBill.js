@@ -50,6 +50,11 @@ products: [{
         type: Number,
         required: true,
         min: 0
+      },
+       unitPrice: {
+        type: Number,
+        required: true,
+        min: 0
       }
     }],
     billType: { 
