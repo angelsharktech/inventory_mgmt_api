@@ -161,7 +161,8 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   if (req.body.variantOptions && req.body.variantOptions.length > 0) {
     req.body.hasVariants = true;
   }
-
+  
+  console.log(req.body)
   const product = await Product.create(req.body);
 
   res.status(201).json({

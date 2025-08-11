@@ -26,9 +26,16 @@ exports.registerGST = async (req, res) => {
     user.gst_id = gst._id;
     await user.save();
 
-    res.status(201).json(gst);
+    res.status(201).json({
+      success: true,
+      message: 'GST details registered successfully',
+      data: gst
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 

@@ -40,8 +40,10 @@ const ProductSchema = new mongoose.Schema({
   },
   sku: {
     type: String,
-    unique: true,
-    uppercase: true
+    // unique: true,
+    // uppercase: true,
+    // sparse: true,
+    set: v => v === '' ? undefined : v
   },
   barcode: {
     type: String,
@@ -240,9 +242,9 @@ const ProductSchema = new mongoose.Schema({
 // ============= MIDDLEWARE =============
 ProductSchema.pre('save', function(next) {
   // Auto-generate SKU if not provided
-  if (!this.sku) {
-    this.sku = `SKU-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-  }
+  // if (!this.sku) {
+  //   this.sku = `SKU-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+  // }
   
   // Generate slug if name changed or new product
   if (this.isModified('name') || this.isNew) {
@@ -264,7 +266,7 @@ ProductSchema.pre('save', function(next) {
 // ============= INDEXES =============
 ProductSchema.index({ name: 'text', description: 'text', tags: 'text', searchKeywords: 'text' });
 ProductSchema.index({ slug: 1 }, { unique: true });
-ProductSchema.index({ sku: 1 }, { unique: true, sparse: true });
+ProductSchema.index({ sku: 1 });  //, { unique: true, sparse: true }
 ProductSchema.index({ barcode: 1 }, { unique: true, sparse: true });
 ProductSchema.index({ category: 1, status: 1 });
 ProductSchema.index({ price: 1, createdAt: -1 });
@@ -337,7 +339,7 @@ ProductSchema.methods.addVariant = function(options) {
   const variantSku = options.sku || `${this.sku}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
   
   this.variantCombinations.push({
-    sku: variantSku,
+    sku: options.sku,
     options: options.values,
     price: options.price || this.price,
     quantity: options.quantity || 0,

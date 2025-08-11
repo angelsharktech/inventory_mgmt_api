@@ -4,7 +4,7 @@ const PaymentModeSchema = new mongoose.Schema({
   paymentType: {
     type: String,
     required: true,
-    enum: ['cash', 'cheque', 'online transfer', 'card', 'upi', 'other'],
+    enum: ['cash', 'cheque', 'online transfer', 'card', 'upi', 'finance','other'],
     default: 'Cash'
   },
   amount: {
@@ -66,6 +66,10 @@ const PaymentModeSchema = new mongoose.Schema({
   chequeDate: {
     type: Date,
     required: function() { return this.paymentType === 'Cheque'; }
+  },
+  financeName: {
+    type: String,
+    required: function() { return this.paymentType === 'Finance'; }
   },
 
   // For Cards
