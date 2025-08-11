@@ -13,7 +13,7 @@ router.get('/', saleBillController.getAllSaleBills);
 router.get('/:id', saleBillController.getSaleBillById);
 router.put('/:id', saleBillController.updateSaleBill);
 router.delete('/:id', saleBillController.deleteSaleBill);
-router.put('/:id/cancel', saleBillController.cancelSaleBill);
+router.put('/cancel/:id', saleBillController.cancelSaleBill);
 router.get('/organization/:orgId', saleBillController.getSaleBillsByOrganization);
 router.get('/customer/:customerId', saleBillController.getSaleBillsByCustomer);
 
