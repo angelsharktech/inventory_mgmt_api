@@ -88,7 +88,12 @@ exports.createPurchaseBill = async (req, res) => {
     });
 
     const savedPurchaseBill = await newPurchaseBill.save();
-
+for (const product of formattedProducts) {
+  const dbProduct = await Product.findById(product._id);
+  if (dbProduct) {
+    await dbProduct.updateInventory(product.qty, 'add');
+  }
+}
     res.status(201).json({
       success: true,
       data: savedPurchaseBill
@@ -314,7 +319,12 @@ exports.deletePurchaseBill = async (req, res) => {
         message: 'Only draft or cancelled bills can be deleted'
       });
     }
-    
+      for (const item of purchaseBill.products) {
+          const dbProduct = await Product.findById(item._id);
+          if (dbProduct) {
+            await dbProduct.updateInventory(item.qty, 'subtract'); // add back stock
+          }
+        }
     purchaseBill.isActive = false;
     await purchaseBill.save();
     
@@ -361,6 +371,12 @@ exports.cancelPurchaseBill = async (req, res) => {
         message: 'Refunded bills cannot be cancelled'
       });
     }
+      for (const item of purchaseBill.products) {
+          const dbProduct = await Product.findById(item._id);
+          if (dbProduct) {
+            await dbProduct.updateInventory(item.qty, 'subtract'); // add back stock
+          }
+        }
     
     purchaseBill.status = 'cancelled';
     await purchaseBill.save();

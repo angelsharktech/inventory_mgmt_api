@@ -92,7 +92,14 @@ exports.createSaleBill = async (req, res) => {
     
 
     const savedSaleBill = await newSaleBill.save();
-
+     // Update inventory
+    // Loop through each product in the formatted list
+for (const product of formattedProducts) {
+  const dbProduct = await Product.findById(product._id);
+  if (dbProduct) {
+    await dbProduct.updateInventory(product.qty, 'subtract');
+  }
+}
     res.status(201).json({
       success: true,
       data: savedSaleBill
@@ -318,7 +325,13 @@ exports.deleteSaleBill = async (req, res) => {
         message: 'Only draft or cancelled bills can be deleted'
       });
     }
-    
+      // Restore inventory before deleting
+    for (const item of saleBill.products) {
+      const dbProduct = await Product.findById(item._id);
+      if (dbProduct) {
+        await dbProduct.updateInventory(item.qty, 'add'); // add back stock
+      }
+    }
     saleBill.isActive = false;
     await saleBill.save();
     
@@ -365,7 +378,13 @@ exports.cancelSaleBill = async (req, res) => {
         message: 'Refunded bills cannot be cancelled'
       });
     }
-    
+     // Restore inventory when cancelling
+    for (const item of saleBill.products) {
+      const dbProduct = await Product.findById(item._id);
+      if (dbProduct) {
+        await dbProduct.updateInventory(item.qty, 'add'); // add stock back
+      }
+    }
     saleBill.status = 'cancelled';
     await saleBill.save();
     
