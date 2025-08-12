@@ -208,7 +208,20 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     data: product
   });
 });
+// @desc    get product by hsn code 
+// @route   get /api/v1/products/hsn/:code
+// @access  Private
+exports.getProductsByHsnCode = asyncHandler(async (req, res, next) => {
+  
 
+  const products = await Product.findOne({ hsnCode: req.params.code });
+
+  res.status(200).json({
+    success: true,
+    count: products.length,
+    data: products
+  });
+});
 // @desc    Delete product
 // @route   DELETE /api/v1/products/:id
 // @access  Private

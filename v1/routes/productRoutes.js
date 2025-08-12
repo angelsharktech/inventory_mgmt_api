@@ -14,7 +14,8 @@ const {
   getRelatedProducts,
   getDiscountedProducts,
   getLowStockProducts,
-  bulkUpdateProducts
+  bulkUpdateProducts,
+  getProductsByHsnCode
 } = require('../controllers/productController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -33,6 +34,7 @@ router.use(protect);
 // Regular user routes
 router.post('/',  createProduct);
 router.put('/:id',  updateProduct);
+router.get('/hsn/:code', getProductsByHsnCode);
 router.delete('/:id',  deleteProduct);
 router.put('/:id/inventory',  updateInventory);
 router.post('/:id/variants',  addVariant);

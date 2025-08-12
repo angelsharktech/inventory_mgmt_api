@@ -319,10 +319,16 @@ ProductSchema.statics.search = function(text) {
 ProductSchema.methods.updateInventory = function(quantityChange, action = 'add') {
   if (action === 'add') {
     this.quantity += quantityChange;
+
+    // If stock was previously out of stock but now has quantity, mark active
+    if (this.quantity > 0 && this.status === 'out_of_stock') {
+      this.status = 'active';
+    }
+
   } else if (action === 'subtract') {
     const newQuantity = this.quantity - quantityChange;
     this.quantity = Math.max(0, newQuantity);
-    
+
     // Auto-update status if out of stock
     if (newQuantity <= 0 && this.status !== 'archived') {
       this.status = 'out_of_stock';
@@ -330,6 +336,7 @@ ProductSchema.methods.updateInventory = function(quantityChange, action = 'add')
   }
   return this.save();
 };
+
 
 ProductSchema.methods.addVariant = function(options) {
   if (!this.hasVariants) {
