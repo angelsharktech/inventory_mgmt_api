@@ -343,7 +343,7 @@ exports.deletePurchaseBill = async (req, res) => {
 
 /**
  * @desc    Cancel a purchase bill
- * @route   PUT /api/purchasebills/:id/cancel
+ * @route   PUT /api/purchasebills/cancel/:id
  * @access  Private
  */
 exports.cancelPurchaseBill = async (req, res) => {
@@ -371,7 +371,9 @@ exports.cancelPurchaseBill = async (req, res) => {
         message: 'Refunded bills cannot be cancelled'
       });
     }
+    
       for (const item of purchaseBill.products) {
+        
           const dbProduct = await Product.findById(item._id);
           if (dbProduct) {
             await dbProduct.updateInventory(item.qty, 'subtract'); // add back stock
