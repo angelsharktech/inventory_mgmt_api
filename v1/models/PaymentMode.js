@@ -88,7 +88,7 @@ const PaymentModeSchema = new mongoose.Schema({
   upiId: {
     type: String,
     required: function() { return this.paymentType === 'UPI'; },
-    match: [/\S+@\S+/, 'Invalid UPI ID format']
+    // match: [/\S+@\S+/, 'Invalid UPI ID format']
   },
 
   // Common Reference

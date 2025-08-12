@@ -723,9 +723,9 @@ function validatePaymentFields(body) {
 
   if (paymentType === 'upi') {
     if (!body.upiId) errors.push('UPI ID is required');
-    if (body.upiId && !/\S+@\S+/.test(body.upiId)) {
-      errors.push('Invalid UPI ID format');
-    }
+    // if (body.upiId && !/\S+@\S+/.test(body.upiId)) {
+    //   errors.push('Invalid UPI ID format');
+    // }
   }
 
   // Validate reference ID format if provided
