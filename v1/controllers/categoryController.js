@@ -4,7 +4,9 @@ const Category = require('../models/Category');
 // @route   POST /api/categories
 exports.createCategory = async (req, res) => {
   try {
-    const { name, description, parent, image, displayOrder } = req.body;
+    console.log(req.body);
+    
+    const { name, description, parent, image, displayOrder,organization_id } = req.body;
     
     const category = await Category.create({
       name,
@@ -12,6 +14,7 @@ exports.createCategory = async (req, res) => {
       parent,
       image,
       displayOrder,
+      organization_id,
       createdBy: req.user._id
     });
 

@@ -75,8 +75,8 @@ const PaymentModeSchema = new mongoose.Schema({
   // For Cards
   cardLastFour: {
     type: String,
-    required: function() { return this.paymentType === 'Card'; },
-    match: [/^[0-9]{4}$/, 'Last 4 digits must be numbers']
+    // required: function() { return this.paymentType === 'Card'; },
+    // match: [/^[0-9]{4}$/, 'Last 4 digits must be numbers']
   },
   cardType: {
     type: String,

@@ -713,12 +713,12 @@ function validatePaymentFields(body) {
   }
 
   if (paymentType === 'card') {
-    if (!body.cardLastFour) errors.push('Card last 4 digits are required');
+    // if (!body.cardLastFour) errors.push('Card last 4 digits are required');
     if (!body.cardType) errors.push('Card type (Debit/Credit) is required');
     
-    if (body.cardLastFour && !/^[0-9]{4}$/.test(body.cardLastFour)) {
-      errors.push('Last 4 digits must be exactly 4 numbers');
-    }
+    // if (body.cardLastFour && !/^[0-9]{4}$/.test(body.cardLastFour)) {
+    //   errors.push('Last 4 digits must be exactly 4 numbers');
+    // }
   }
 
   if (paymentType === 'upi') {

@@ -21,6 +21,7 @@ exports.createSaleBill = async (req, res) => {
       paymentType,
       advance,
       balance,
+      balancePayMode,
       advancePayments,
       balancePayments,
       fullPaid,
@@ -70,6 +71,7 @@ exports.createSaleBill = async (req, res) => {
       paymentType,
       advance,
       balance,
+      balancePayMode,
       advancePayments,
       balancePayments,
       fullPaid,
@@ -88,7 +90,7 @@ exports.createSaleBill = async (req, res) => {
       dueDate,
       status
     });
-    console.log(newSaleBill);
+    // console.log(newSaleBill);
     
 
     const savedSaleBill = await newSaleBill.save();
@@ -268,12 +270,12 @@ exports.updateSaleBill = async (req, res) => {
     saleBill.billType = billType || saleBill.billType;
     saleBill.gstPercent = gstPercent || saleBill.gstPercent;
     saleBill.qty = qty || saleBill.qty;
-    saleBill.paymentType = paymentType || saleBill.paymentType;
-    saleBill.advance = advance || saleBill.advance;
-    saleBill.balance = balance || saleBill.balance;
+    saleBill.paymentType = req.body.paymentType;
+    saleBill.advance = req.body.advance;
+    saleBill.balance = req.body.balance;
     saleBill.advancePayments = advancePayments || saleBill.advancePayments;
     saleBill.balancePayments = balancePayments || saleBill.balancePayments;
-    saleBill.fullPaid = fullPaid || saleBill.fullPaid;
+    saleBill.fullPaid = req.body.fullPaid;
     saleBill.fullPayment = fullPayment || saleBill.fullPayment;
     saleBill.subtotal = subtotal || saleBill.subtotal;
     saleBill.discount = discount || saleBill.discount;

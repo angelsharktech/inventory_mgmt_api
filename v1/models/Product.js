@@ -70,7 +70,7 @@ const ProductSchema = new mongoose.Schema({
   },
   hsnCode: {
     type: String,
-    match: [/^[0-9]{6,8}$/, 'HSN code must be 6-8 digits']
+   
   },
   taxClass: {
     type: String,

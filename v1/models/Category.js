@@ -8,6 +8,10 @@ const CategorySchema = new mongoose.Schema({
     trim: true,
     maxlength: [50, 'Category name cannot exceed 50 characters']
   },
+    organization_id: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'Organization',
+    },
   slug: {
     type: String,
     unique: true,

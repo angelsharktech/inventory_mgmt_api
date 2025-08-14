@@ -21,6 +21,7 @@ exports.createPurchaseBill = async (req, res) => {
       paymentType,
       advance,
       balance,
+      balancePayMode,
       advancePayments,
       balancePayments,
       fullPaid,
@@ -68,6 +69,7 @@ exports.createPurchaseBill = async (req, res) => {
       paymentType,
       advance,
       balance,
+      balancePayMode,
       advancePayments,
       balancePayments,
       fullPaid,
@@ -255,6 +257,7 @@ exports.updatePurchaseBill = async (req, res) => {
         message: 'Only draft bills can be modified'
       });
     }
+    console.log(req.body);
     
     // Update fields
     purchaseBill.bill_to = bill_to || purchaseBill.bill_to;
@@ -262,12 +265,12 @@ exports.updatePurchaseBill = async (req, res) => {
     purchaseBill.billType = billType || purchaseBill.billType;
     purchaseBill.gstPercent = gstPercent || purchaseBill.gstPercent;
     purchaseBill.qty = qty || purchaseBill.qty;
-    purchaseBill.paymentType = paymentType || purchaseBill.paymentType;
-    purchaseBill.advance = advance || purchaseBill.advance;
-    purchaseBill.balance = balance || purchaseBill.balance;
+    purchaseBill.paymentType = req.body.paymentType;
+    purchaseBill.advance = req.body.advance;
+    purchaseBill.balance =req.body.balance;
     purchaseBill.advancePayments = advancePayments || purchaseBill.advancePayments;
     purchaseBill.balancePayments = balancePayments || purchaseBill.balancePayments;
-    purchaseBill.fullPaid = fullPaid || purchaseBill.fullPaid;
+    purchaseBill.fullPaid = req.body.fullPaid;
     purchaseBill.fullPayment = fullPayment || purchaseBill.fullPayment;
     purchaseBill.subtotal = subtotal || purchaseBill.subtotal;
     purchaseBill.discount = discount || purchaseBill.discount;
@@ -280,6 +283,8 @@ exports.updatePurchaseBill = async (req, res) => {
     purchaseBill.notes = notes || purchaseBill.notes;
     purchaseBill.dueDate = dueDate || purchaseBill.dueDate;
     purchaseBill.status = status || purchaseBill.status;
+    
+    console.log('***',purchaseBill);
     
     const updatedPurchaseBill = await purchaseBill.save();
     

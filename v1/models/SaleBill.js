@@ -102,6 +102,9 @@ products: [{
       default: 0,
       min: 0
     },
+    balancePayMode:{
+      type: String
+    },
     advancePayments: {
       type: mongoose.Schema.Types.ObjectId, 
       ref: "PaymentMode",
