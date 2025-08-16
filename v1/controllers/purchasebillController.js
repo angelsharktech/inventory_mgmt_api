@@ -90,12 +90,12 @@ exports.createPurchaseBill = async (req, res) => {
     });
 
     const savedPurchaseBill = await newPurchaseBill.save();
-for (const product of formattedProducts) {
-  const dbProduct = await Product.findById(product._id);
-  if (dbProduct) {
-    await dbProduct.updateInventory(product.qty, 'add');
-  }
-}
+// for (const product of formattedProducts) {
+//   const dbProduct = await Product.findById(product._id);
+//   if (dbProduct) {
+//     await dbProduct.updateInventory(product.qty, 'add');
+//   }
+// }
     res.status(201).json({
       success: true,
       data: savedPurchaseBill

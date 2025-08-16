@@ -54,7 +54,7 @@ const PaymentModeSchema = new mongoose.Schema({
   bankName: {
     type: String,
     required: function() { 
-      return this.paymentType === 'Online Transfer' || this.paymentType === 'Cheque'; 
+      return this.paymentType === 'Cheque'; 
     }
   },
 

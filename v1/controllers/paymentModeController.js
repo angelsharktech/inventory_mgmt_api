@@ -694,8 +694,8 @@ function validatePaymentFields(body) {
 
   // Payment type specific validations
   if (paymentType === 'online transfer') {
-    if (!body.utrId) errors.push('UTR ID is required for online transfers');
-    if (!body.bankName) errors.push('Bank name is required for online transfers');
+    if (!body.utrId) errors.push('Transaction ID is required for online transfers');
+   
   }
   if (paymentType === 'finance') {
     if (!body.financeName) errors.push('Finane Name is required for finance');
