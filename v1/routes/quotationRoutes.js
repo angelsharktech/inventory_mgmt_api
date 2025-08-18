@@ -11,6 +11,7 @@ router.get('/', quotationController.getAllQuotations);
 
 // Get single quotation by ID
 router.get('/:id', quotationController.getQuotationById);
+router.get('/organization/:id', quotationController.getQuotationByOrganizationId);
 
 // Update a quotation
 router.put('/:id', quotationController.updateQuotation);
