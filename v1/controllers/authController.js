@@ -26,6 +26,7 @@ exports.register = async (req, res) => {
       isClient,
       // Banking details
       bankDetails,
+      gstDetails,
       // Client-specific fields
       clientProfile
     } = req.body;
@@ -48,6 +49,7 @@ exports.register = async (req, res) => {
       status,
       isClient: isClient || false,
       bankDetails: bankDetails || {},
+      gstDetails: gstDetails || {},
       clientProfile: isClient ? {
         ...clientProfile,
         clientSince: clientProfile?.clientSince || new Date()
@@ -90,6 +92,8 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
+    console.log("res.body",req.body);
+    
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select('+password');
     
@@ -103,7 +107,7 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    
+    console.log('user',user);
     // Return more user information upon login
     res.status(200).json({ 
       token,
@@ -119,6 +123,8 @@ exports.login = async (req, res) => {
       }
     });
   } catch (error) {
+    console.log(error);
+    
     res.status(400).json({ 
       error: error.message,
       details: error.errors 

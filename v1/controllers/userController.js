@@ -56,7 +56,10 @@ exports.createUser = async (req, res) => {
       bio,
       status,
       hidefee,
-      gstRegistered,
+      // gstRegistered,
+  bankDetails,
+  gstDetails,
+    
     } = req.body;
 
     const user = new User({
@@ -76,7 +79,9 @@ exports.createUser = async (req, res) => {
       bio,
       status,
       hidefee,
-      gstRegistered,
+      bankDetails,
+      gstDetails,
+      // gstRegistered,
     });
 
     await user.save();
@@ -95,6 +100,7 @@ exports.getAllUsers = async (req, res) => {
       .populate('position_id');
     res.status(200).json(users);
   } catch (error) {
+    console.log(error);
     res.status(500).send(error.message);
   }
 };
@@ -102,6 +108,8 @@ exports.getAllUsers = async (req, res) => {
 // Get a single user by ID (protected route)
 exports.getUserById = async (req, res) => {
   try {
+   console.log(req.params.id);
+   
     const user = await User.findById(req.params.id)
       .populate('organization_id')
       .populate('role_id')
@@ -111,6 +119,8 @@ exports.getUserById = async (req, res) => {
     }
     res.status(200).json(user);
   } catch (error) {
+    console.log(error);
+    
     res.status(500).send(error.message);
   }
 };

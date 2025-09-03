@@ -27,7 +27,7 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 
   // Finding resource
   query = Product.find(JSON.parse(queryStr))
-    .populate('category', 'name slug')
+    .populate('category', 'categoryName slug')
     .populate('subCategory', 'name slug')
     .populate('collections', 'name slug')
     .populate('createdBy', 'name email');
@@ -98,8 +98,10 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/products/:id
 // @access  Public
 exports.getProduct = asyncHandler(async (req, res, next) => {
+  
+  
   const product = await Product.findById(req.params.id)
-    .populate('category', 'name slug')
+    .populate('category', 'categoryName slug')
     .populate('subCategory', 'name slug')
     .populate('collections', 'name slug')
     .populate('relatedProducts', 'name slug price images')
@@ -125,7 +127,7 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
 // @access  Public
 exports.getProductBySlug = asyncHandler(async (req, res, next) => {
   const product = await Product.findOne({ slug: req.params.slug })
-    .populate('category', 'name slug')
+    .populate('category', 'categoryName slug')
     .populate('subCategory', 'name slug')
     .populate('collections', 'name slug')
     .populate('relatedProducts', 'name slug price images')
@@ -353,7 +355,7 @@ exports.getFeaturedProducts = asyncHandler(async (req, res, next) => {
   })
   .sort('featuredOrder')
   .limit(limit)
-  .populate('category', 'name slug');
+  .populate('category', 'categoryName slug');
 
   res.status(200).json({
     success: true,
@@ -414,7 +416,7 @@ exports.getDiscountedProducts = asyncHandler(async (req, res, next) => {
   })
   .sort('-discountPercentage')
   .limit(limit)
-  .populate('category', 'name slug');
+  .populate('category', 'categoryName slug');
 
   res.status(200).json({
     success: true,
@@ -433,7 +435,7 @@ exports.getLowStockProducts = asyncHandler(async (req, res, next) => {
     status: { $in: ['active', 'out_of_stock'] }
   })
   .sort('quantity')
-  .populate('category', 'name');
+  .populate('category', 'categoryName');
 
   res.status(200).json({
     success: true,

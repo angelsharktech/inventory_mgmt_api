@@ -29,9 +29,9 @@ exports.createSaleBill = async (req, res) => {
       subtotal,
       discount,
       gstTotal,
-      cgst,
-      sgst,
-      igst,
+      // cgst,
+      // sgst,
+      // igst,
       roundOff,
       grandTotal,
       org,
@@ -40,7 +40,7 @@ exports.createSaleBill = async (req, res) => {
       status
     } = req.body;
 
-  const formattedProducts = await Promise.all(products.map(async (product) => {
+    const formattedProducts = await Promise.all(products.map(async (product) => {
       // You might want to fetch the product details from your Product collection
       const productDetails = await Product.findById(product._id);
       if (!productDetails) {
@@ -54,7 +54,11 @@ exports.createSaleBill = async (req, res) => {
         qty: product.qty,
         discount: product.discount || 0,
         price: product.price || productDetails.price,
-        unitPrice : product.compareAtPrice || productDetails.compareAtPrice
+        unitPrice: product.compareAtPrice || productDetails.compareAtPrice,
+        cgst: product.cgst || 0,
+        sgst: product.sgst || 0,
+        igst: product.igst || 0,
+        gstPercent: product.gstPercent || 0
       };
     }));
 
@@ -79,9 +83,9 @@ exports.createSaleBill = async (req, res) => {
       subtotal,
       discount,
       gstTotal,
-      cgst,
-      sgst,
-      igst,
+      // cgst,
+      // sgst,
+      // igst,
       roundOff,
       grandTotal,
       org,
@@ -91,17 +95,17 @@ exports.createSaleBill = async (req, res) => {
       status
     });
     // console.log(newSaleBill);
-    
+
 
     const savedSaleBill = await newSaleBill.save();
-     // Update inventory
+    // Update inventory
     // Loop through each product in the formatted list
-for (const product of formattedProducts) {
-  const dbProduct = await Product.findById(product._id);
-  if (dbProduct) {
-    await dbProduct.updateInventory(product.qty, 'subtract');
-  }
-}
+    for (const product of formattedProducts) {
+      const dbProduct = await Product.findById(product._id);
+      if (dbProduct) {
+        await dbProduct.updateInventory(product.qty, 'subtract');
+      }
+    }
     res.status(201).json({
       success: true,
       data: savedSaleBill
@@ -124,26 +128,26 @@ for (const product of formattedProducts) {
 exports.getAllSaleBills = async (req, res) => {
   try {
     const { org, status, startDate, endDate } = req.query;
-    
+
     const query = { isActive: true };
-    
+
     if (org) query.org = mongoose.Types.ObjectId(org);
     if (status) query.status = status;
-    
+
     if (startDate && endDate) {
       query.createdAt = {
         $gte: new Date(startDate),
         $lte: new Date(endDate)
       };
     }
-    
+
     const options = {
       // page: parseInt(page),
       // limit: parseInt(limit),
       sort: { createdAt: -1 },
       populate: ['bill_to', 'org', 'createdBy']
     };
-    
+
     // Manual pagination implementation
     const skip = (options.page - 1) * options.limit;
     const countPromise = SaleBill.countDocuments(query);
@@ -152,9 +156,9 @@ exports.getAllSaleBills = async (req, res) => {
       // .limit(options.limit)
       .sort(options.sort)
       .populate(options.populate);
-    
+
     const [total, saleBills] = await Promise.all([countPromise, itemsPromise]);
-    
+
     const result = {
       docs: saleBills,
       totalDocs: total,
@@ -164,7 +168,7 @@ exports.getAllSaleBills = async (req, res) => {
       // hasNextPage: options.page * options.limit < total,
       // hasPrevPage: options.page > 1
     };
-    
+
     res.status(200).json({
       success: true,
       data: result
@@ -193,14 +197,14 @@ exports.getSaleBillById = async (req, res) => {
       .populate('advancePayments')
       .populate('balancePayments')
       .populate('fullPayment');
-    
+
     if (!saleBill || !saleBill.isActive) {
       return res.status(404).json({
         success: false,
         message: 'Sale bill not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: saleBill
@@ -248,14 +252,14 @@ exports.updateSaleBill = async (req, res) => {
     } = req.body;
 
     const saleBill = await SaleBill.findById(req.params.id);
-    
+
     if (!saleBill || !saleBill.isActive) {
       return res.status(404).json({
         success: false,
         message: 'Sale bill not found'
       });
     }
-    
+
     // Check if bill is already issued/cancelled/refunded
     if (saleBill.status !== 'draft' && req.body.status !== saleBill.status) {
       return res.status(400).json({
@@ -263,7 +267,7 @@ exports.updateSaleBill = async (req, res) => {
         message: 'Only draft bills can be modified'
       });
     }
-    
+
     // Update fields
     saleBill.bill_to = bill_to || saleBill.bill_to;
     saleBill.products = products || saleBill.products;
@@ -288,9 +292,9 @@ exports.updateSaleBill = async (req, res) => {
     saleBill.notes = notes || saleBill.notes;
     saleBill.dueDate = dueDate || saleBill.dueDate;
     saleBill.status = status || saleBill.status;
-    
+
     const updatedSaleBill = await saleBill.save();
-    
+
     res.status(200).json({
       success: true,
       data: updatedSaleBill
@@ -312,14 +316,14 @@ exports.updateSaleBill = async (req, res) => {
 exports.deleteSaleBill = async (req, res) => {
   try {
     const saleBill = await SaleBill.findById(req.params.id);
-    
+
     if (!saleBill || !saleBill.isActive) {
       return res.status(404).json({
         success: false,
         message: 'Sale bill not found'
       });
     }
-    
+
     // Check if bill can be deleted (only drafts or cancelled bills)
     if (saleBill.status !== 'draft' && saleBill.status !== 'cancelled') {
       return res.status(400).json({
@@ -327,7 +331,7 @@ exports.deleteSaleBill = async (req, res) => {
         message: 'Only draft or cancelled bills can be deleted'
       });
     }
-      // Restore inventory before deleting
+    // Restore inventory before deleting
     for (const item of saleBill.products) {
       const dbProduct = await Product.findById(item._id);
       if (dbProduct) {
@@ -336,7 +340,7 @@ exports.deleteSaleBill = async (req, res) => {
     }
     saleBill.isActive = false;
     await saleBill.save();
-    
+
     res.status(200).json({
       success: true,
       message: 'Sale bill deleted successfully'
@@ -358,14 +362,14 @@ exports.deleteSaleBill = async (req, res) => {
 exports.cancelSaleBill = async (req, res) => {
   try {
     const saleBill = await SaleBill.findById(req.params.id);
-    
+
     if (!saleBill || !saleBill.isActive) {
       return res.status(404).json({
         success: false,
         message: 'Sale bill not found'
       });
     }
-    
+
     // Check if bill can be cancelled
     if (saleBill.status === 'cancelled') {
       return res.status(400).json({
@@ -373,14 +377,14 @@ exports.cancelSaleBill = async (req, res) => {
         message: 'Bill is already cancelled'
       });
     }
-    
+
     if (saleBill.status === 'refunded') {
       return res.status(400).json({
         success: false,
         message: 'Refunded bills cannot be cancelled'
       });
     }
-     // Restore inventory when cancelling
+    // Restore inventory when cancelling
     for (const item of saleBill.products) {
       const dbProduct = await Product.findById(item._id);
       if (dbProduct) {
@@ -389,7 +393,7 @@ exports.cancelSaleBill = async (req, res) => {
     }
     saleBill.status = 'cancelled';
     await saleBill.save();
-    
+
     res.status(200).json({
       success: true,
       data: saleBill,
@@ -410,22 +414,22 @@ exports.cancelSaleBill = async (req, res) => {
  */
 exports.getSaleBillsByOrganization = async (req, res) => {
   try {
-    const { status, startDate, endDate} = req.query;
-    
-    const query = { 
+    const { status, startDate, endDate } = req.query;
+
+    const query = {
       org: req.params.orgId,
       isActive: true
     };
-    
+
     if (status) query.status = status;
-    
+
     if (startDate && endDate) {
       query.createdAt = {
         $gte: new Date(startDate),
         $lte: new Date(endDate)
       };
     }
-    
+
     // const skip = (page - 1) * limit;
     const countPromise = SaleBill.countDocuments(query);
     const itemsPromise = SaleBill.find(query)
@@ -433,9 +437,9 @@ exports.getSaleBillsByOrganization = async (req, res) => {
       // .limit(parseInt(limit))
       .sort({ createdAt: -1 })
       .populate(['bill_to', 'createdBy']);
-    
+
     const [total, saleBills] = await Promise.all([countPromise, itemsPromise]);
-    
+
     const result = {
       docs: saleBills,
       totalDocs: total,
@@ -445,7 +449,7 @@ exports.getSaleBillsByOrganization = async (req, res) => {
       // hasNextPage: (page * limit) < total,
       // hasPrevPage: page > 1
     };
-    
+
     res.status(200).json({
       success: true,
       data: result
@@ -467,21 +471,21 @@ exports.getSaleBillsByOrganization = async (req, res) => {
 exports.getSaleBillsByCustomer = async (req, res) => {
   try {
     const { status, startDate, endDate } = req.query;
-    
-    const query = { 
+
+    const query = {
       bill_to: req.params.customerId,
       isActive: true
     };
-    
+
     if (status) query.status = status;
-    
+
     if (startDate && endDate) {
       query.createdAt = {
         $gte: new Date(startDate),
         $lte: new Date(endDate)
       };
     }
-    
+
     // const skip = (page - 1) * limit;
     const countPromise = SaleBill.countDocuments(query);
     const itemsPromise = SaleBill.find(query)
@@ -489,9 +493,9 @@ exports.getSaleBillsByCustomer = async (req, res) => {
       // .limit(parseInt(limit))
       .sort({ createdAt: -1 })
       .populate(['org', 'createdBy']);
-    
+
     const [total, saleBills] = await Promise.all([countPromise, itemsPromise]);
-    
+
     const result = {
       docs: saleBills,
       totalDocs: total,
@@ -501,7 +505,7 @@ exports.getSaleBillsByCustomer = async (req, res) => {
       // hasNextPage: (page * limit) < total,
       // hasPrevPage: page > 1
     };
-    
+
     res.status(200).json({
       success: true,
       data: result
@@ -523,17 +527,17 @@ exports.getSaleBillsByCustomer = async (req, res) => {
 exports.getSaleBillsSummary = async (req, res) => {
   try {
     const { org, startDate, endDate } = req.query;
-    
+
     const matchQuery = { isActive: true };
     if (org) matchQuery.org = mongoose.Types.ObjectId(org);
-    
+
     if (startDate && endDate) {
       matchQuery.createdAt = {
         $gte: new Date(startDate),
         $lte: new Date(endDate)
       };
     }
-    
+
     const summary = await SaleBill.aggregate([
       { $match: matchQuery },
       {
@@ -541,8 +545,8 @@ exports.getSaleBillsSummary = async (req, res) => {
           _id: null,
           totalBills: { $sum: 1 },
           totalAmount: { $sum: "$grandTotal" },
-          totalPaid: { 
-            $sum: { 
+          totalPaid: {
+            $sum: {
               $cond: [
                 { $eq: ["$paymentType", "full"] },
                 "$grandTotal",
@@ -580,7 +584,7 @@ exports.getSaleBillsSummary = async (req, res) => {
         }
       }
     ]);
-    
+
     res.status(200).json({
       success: true,
       data: summary[0] || {

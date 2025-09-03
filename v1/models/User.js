@@ -28,7 +28,25 @@ const UserSchema = new mongoose.Schema({
     paymentQR: { type: String } // This could store a URL or path to the QR code image
   },
   
-    gstRegistered: { type: Boolean, default: false },
+   gstDetails: {
+    gstNumber: { type: String, trim: true }, // 15-digit GSTIN
+    legalName: { type: String, trim: true },
+    tradeName: { type: String, trim: true },
+    state: { type: String },
+    stateCode: { type: String },
+    registrationType: {
+      type: String,
+      enum: ['Regular', 'Composition', 'SEZ', 'Unregistered'],
+      default: 'Regular'
+    },
+    gstStatus: {
+      type: String,
+      enum: ['Active', 'Cancelled', 'Suspended'],
+      default: 'Active'
+    },
+    address: { type: String },
+    // isInclusiveGST: { type: Boolean, default: false } // price includes GST or not
+  },
   // ======================
   // Client-Specific Fields (embedded)
   // ======================

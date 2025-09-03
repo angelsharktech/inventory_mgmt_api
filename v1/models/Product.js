@@ -70,7 +70,7 @@ const ProductSchema = new mongoose.Schema({
   },
   hsnCode: {
     type: String,
-   
+   required: true
   },
   taxClass: {
     type: String,

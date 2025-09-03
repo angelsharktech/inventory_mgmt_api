@@ -53,7 +53,11 @@ exports.createPurchaseBill = async (req, res) => {
             qty: product.qty,
             discount: product.discount || 0,
             price: product.price || productDetails.price,
-            unitPrice : product.compareAtPrice || productDetails.compareAtPrice
+            unitPrice : product.compareAtPrice || productDetails.compareAtPrice,
+            cgst: product.cgst || 0,
+            sgst: product.sgst || 0,
+            igst: product.igst || 0,
+            gstPercent: product.gstPercent || 0
           };
         }));
     // Generate bill number if not provided
@@ -88,6 +92,9 @@ exports.createPurchaseBill = async (req, res) => {
       dueDate,
       status
     });
+console.log("RRRRR",req.body);
+console.log("****",newPurchaseBill);
+
 
     const savedPurchaseBill = await newPurchaseBill.save();
 // for (const product of formattedProducts) {

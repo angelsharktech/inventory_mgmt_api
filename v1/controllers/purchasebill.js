@@ -12,11 +12,13 @@ const Product = require('../models/Product');
  */
 exports.createPurchaseBill = async (req, res) => {
   try {
+    console.log('***',req.body);
+    
     const {
       bill_to,
       products,
       billType,
-      gstPercent,
+      // gstPercent,
       qty,
       paymentType,
       advance,
@@ -28,9 +30,9 @@ exports.createPurchaseBill = async (req, res) => {
       subtotal,
       discount,
       gstTotal,
-      cgst,
-      sgst,
-      igst,
+      // cgst,
+      // sgst,
+      // igst,
       roundOff,
       grandTotal,
       org,
@@ -51,7 +53,12 @@ exports.createPurchaseBill = async (req, res) => {
             hsnCode: productDetails.hsnCode || product.hsnCode,
             qty: product.qty,
             discount: product.discount || 0,
-            price: product.price || productDetails.price
+            price: product.price || productDetails.price,
+            unitPrice: product.unitPrice || productDetails.price,
+            cgst: product.cgst || 0,  
+            sgst: product.sgst || 0,  
+            igst: product.igst || 0,
+            gstPercent: product.gstPercent || 0
           };
         }));
     // Generate bill number if not provided
@@ -62,7 +69,7 @@ exports.createPurchaseBill = async (req, res) => {
       bill_to,
       products: formattedProducts,
       billType,
-      gstPercent,
+      // gstPercent,
       qty,
       paymentType,
       advance,
@@ -74,9 +81,9 @@ exports.createPurchaseBill = async (req, res) => {
       subtotal,
       discount,
       gstTotal,
-      cgst,
-      sgst,
-      igst,
+      // cgst,
+      // sgst,
+      // igst,
       roundOff,
       grandTotal,
       org,
@@ -85,7 +92,8 @@ exports.createPurchaseBill = async (req, res) => {
       dueDate,
       status
     });
-
+    console.log(newPurchaseBill);
+    
     const savedPurchaseBill = await newPurchaseBill.save();
 
     res.status(201).json({

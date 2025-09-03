@@ -55,6 +55,33 @@ products: [{
         type: Number,
         required: true,
         min: 0
+      },
+      cgst: {
+        type: Number,
+        default: 0,
+        min: 0
+      },
+      sgst: {
+        type: Number,
+        default: 0,
+        min: 0
+      },
+      igst: {
+        type: Number,
+        default: 0,
+        min: 0
+      },
+      gstPercent: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 100,
+        validate: {
+          validator: function (v) {
+            return this.billType === 'gst' ? v > 0 : true;
+          },
+          message: "GST percentage is required for GST bills"
+        }
       }
     }],
     billType: { 
@@ -63,18 +90,18 @@ products: [{
       default: "non-gst",
       required: true
     },
-    gstPercent: { 
-      type: Number, 
-      default: 0,
-      min: 0,
-      max: 100,
-      validate: {
-        validator: function(v) {
-          return this.billType === 'gst' ? v > 0 : true;
-        },
-        message: "GST percentage is required for GST bills"
-      }
-    },
+    // gstPercent: { 
+    //   type: Number, 
+    //   default: 0,
+    //   min: 0,
+    //   max: 100,
+    //   validate: {
+    //     validator: function(v) {
+    //       return this.billType === 'gst' ? v > 0 : true;
+    //     },
+    //     message: "GST percentage is required for GST bills"
+    //   }
+    // },
     qty: {
       type: Number,
       default: 1,
@@ -137,21 +164,21 @@ products: [{
       default: 0,
       min: 0
     },
-    cgst: { 
-      type: Number, 
-      default: 0,
-      min: 0
-    },
-    sgst: { 
-      type: Number, 
-      default: 0,
-      min: 0
-    },
-    igst: { 
-      type: Number, 
-      default: 0,
-      min: 0
-    },
+    // cgst: { 
+    //   type: Number, 
+    //   default: 0,
+    //   min: 0
+    // },
+    // sgst: { 
+    //   type: Number, 
+    //   default: 0,
+    //   min: 0
+    // },
+    // igst: { 
+    //   type: Number, 
+    //   default: 0,
+    //   min: 0
+    // },
     roundOff: {
       type: Number,
       default: 0
