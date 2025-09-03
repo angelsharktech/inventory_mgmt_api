@@ -37,7 +37,7 @@ connectDB();
 
 // Configure CORS options
 const corsOptions = {
-  origin: 'https://inventory-mgmt-nxq9.onrender.com/', // Allow only this origin
+  origin: 'https://inventory-mgmt-nxq9.onrender.com', // Allow only this origin
   // origin: 'http://localhost:3000', // Allow only this origin
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true, // Allow cookies and authentication headers
